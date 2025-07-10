@@ -1,0 +1,77 @@
+{% extends 'admin/base_site.html' %}
+{% block title %}Shop Dashboard{% endblock %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Shop Dashboard</h1>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded shadow p-6 text-center">
+        <div class="text-2xl font-bold">${{ total_sales }}</div>
+        <div class="text-gray-600">Total Sales</div>
+    </div>
+    <div class="bg-white rounded shadow p-6 text-center">
+        <div class="text-2xl font-bold">{{ order_count }}</div>
+        <div class="text-gray-600">Orders</div>
+    </div>
+    <div class="bg-white rounded shadow p-6 text-center">
+        <div class="text-2xl font-bold">{{ product_count }}</div>
+        <div class="text-gray-600">Products</div>
+    </div>
+    <div class="bg-white rounded shadow p-6 text-center">
+        <div class="text-2xl font-bold">{{ category_count }}</div>
+        <div class="text-gray-600">Categories</div>
+    </div>
+</div>
+<h2 class="text-xl font-semibold mb-4">Sales Over Time</h2>
+<canvas id="salesChart" height="80"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('salesChart').getContext('2d');
+const salesChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+            label: 'Sales ($)',
+            data: {{ chart_data|safe }},
+            borderColor: 'rgba(37, 99, 235, 1)',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            fill: true,
+            tension: 0.3,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+</script>
+<h2 class="text-xl font-semibold mb-4 mt-8">Recent Orders</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in recent_orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.user }}</td>
+            <td>{{ order.status }}</td>
+            <td>${{ order.total_amount }}</td>
+            <td>{{ order.created_at }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No recent orders.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %} 

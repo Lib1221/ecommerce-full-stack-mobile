@@ -1,0 +1,65 @@
+{% extends 'py_shopping/base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Welcome to the Shop</h1>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+    {% for product in products %}
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-shadow duration-300">
+        <div class="h-48 w-full bg-gray-100 flex items-center justify-center">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="h-48 w-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                <div style="display:none;" class="absolute inset-0 h-48 w-full bg-gray-200 flex items-center justify-center text-gray-400 text-4xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a4 4 0 004 4h10a4 4 0 004-4V7M3 7a4 4 0 014-4h10a4 4 0 014 4M3 7h18" /></svg>
+                </div>
+            {% else %}
+                <div class="h-48 w-full bg-gray-200 flex items-center justify-center text-gray-400 text-4xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a4 4 0 004 4h10a4 4 0 004-4V7M3 7a4 4 0 014-4h10a4 4 0 014 4M3 7h18" /></svg>
+                </div>
+            {% endif %}
+        </div>
+        <div class="p-4 flex-1 flex flex-col">
+            <h2 class="text-lg font-semibold mb-2">{{ product.name }}</h2>
+            <p class="text-gray-600 flex-1">{{ product.description|truncatewords:20 }}</p>
+            <div class="mt-4 flex items-center justify-between">
+                <span class="text-blue-600 font-bold text-xl">${{ product.price }}</span>
+                <span class="bg-gray-100 text-xs px-2 py-1 rounded">In stock: {{ product.inventory }}</span>
+            </div>
+            <a href="{% url 'product_detail' product.pk %}" class="mt-4 inline-block text-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">View Details</a>
+            <form action="{% url 'add_to_cart' product.pk %}" method="post" class="mt-2 add-to-cart-form">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Add to Cart</button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <p class="col-span-full text-center text-gray-500">No products available.</p>
+    {% endfor %}
+</div>
+<script>
+document.querySelectorAll('.add-to-cart-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const url = this.action;
+        const csrf = this.querySelector('[name=csrfmiddlewaretoken]').value;
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrf,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                showToast('Added to cart!');
+                fetchCartCount();
+                setTimeout(() => {
+                    window.location.href = "/shop/cart/";
+                }, 500);
+            } else {
+                showToast('Could not add to cart.');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

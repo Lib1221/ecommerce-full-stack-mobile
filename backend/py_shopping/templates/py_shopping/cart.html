@@ -1,0 +1,41 @@
+{% extends 'py_shopping/base.html' %}
+{% block title %}Cart{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Your Cart</h1>
+{% if messages %}
+  <div class="mb-4">
+    {% for message in messages %}
+      <div class="p-3 rounded bg-green-100 text-green-800 mb-2">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+<table class="min-w-full bg-white rounded shadow">
+    <thead>
+        <tr>
+            <th class="py-2 px-4">Product</th>
+            <th class="py-2 px-4">Quantity</th>
+            <th class="py-2 px-4">Price</th>
+        </tr>
+    </thead>
+    <tbody id="cart-list">
+    </tbody>
+</table>
+<script>
+fetch('/api/shop/cart/items/')
+  .then(response => response.json())
+  .then(data => {
+    const container = document.getElementById('cart-list');
+    if (!data.length) {
+      container.innerHTML = '<tr><td colspan="3" class="py-2 px-4">Your cart is empty.</td></tr>';
+      return;
+    }
+    container.innerHTML = data.map(item => `
+      <tr>
+        <td class="py-2 px-4">${item.product}</td>
+        <td class="py-2 px-4">${item.quantity}</td>
+        <td class="py-2 px-4">$${item.price}</td>
+      </tr>
+    `).join('');
+  });
+</script>
+{% endblock %} 

@@ -1,0 +1,14 @@
+{% extends 'py_shopping/base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-8 rounded shadow">
+    <h2 class="text-2xl font-bold mb-6">Login</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded mt-4">Login</button>
+    </form>
+    <p class="mt-4 text-center">Don't have an account? <a href="{% url 'signup' %}" class="text-blue-600 hover:underline">Sign up</a></p>
+</div>
+{% endblock %} 

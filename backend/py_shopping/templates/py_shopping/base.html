@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Shop{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-6 right-6 z-50 hidden bg-green-600 text-white px-6 py-3 rounded shadow-lg transition-opacity duration-300"></div>
+    <!-- BASE NAVBAR TEST -->
+    <nav class="bg-white shadow mb-8">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/shop/products/" class="text-xl font-bold text-blue-600">Shop</a>
+            <div>
+                <a href="/shop/cart/" class="mx-2 text-gray-700 hover:text-blue-600 relative">
+                    Cart
+                    <span id="cart-badge" class="absolute -top-2 -right-4 bg-blue-600 text-white text-xs rounded-full px-2 py-0.5 hidden">0</span>
+                </a>
+                <a href="/shop/orders/" class="mx-2 text-gray-700 hover:text-blue-600">Orders</a>
+                {% if user.is_authenticated %}
+                    <span class="mx-2 text-gray-700">Hello, {{ user.username }}</span>
+                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="mx-2 text-gray-700 hover:text-blue-600 bg-none border-none p-0">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="mx-2 text-gray-700 hover:text-blue-600">Login</a>
+                    <a href="{% url 'signup' %}" class="mx-2 text-gray-700 hover:text-blue-600">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    <main class="container mx-auto px-4">
+        {% block content %}{% endblock %}
+    </main>
+    <script>
+    // Toast notification logic
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.remove('hidden');
+        toast.classList.add('opacity-100');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+            toast.classList.remove('opacity-100');
+        }, 2000);
+    }
+
+    // Cart badge logic
+    function updateCartBadge(count) {
+        const badge = document.getElementById('cart-badge');
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+    }
+    function fetchCartCount() {
+        fetch('/shop/cart/count/')
+            .then(response => response.json())
+            .then(data => updateCartBadge(data.count));
+    }
+    fetchCartCount();
+    // Expose for AJAX add-to-cart
+    window.updateCartBadge = updateCartBadge;
+    window.fetchCartCount = fetchCartCount;
+    </script>
+</body>
+</html> 

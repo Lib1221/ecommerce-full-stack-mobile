@@ -1,0 +1,56 @@
+{% extends 'py_shopping/base.html' %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden mt-8">
+    <div class="md:flex">
+        <div class="md:w-1/2 bg-gray-100 flex items-center justify-center">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="object-contain h-72 w-full">
+            {% else %}
+                <div class="h-72 w-full flex items-center justify-center text-gray-400 text-6xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a4 4 0 004 4h10a4 4 0 004-4V7M3 7a4 4 0 014-4h10a4 4 0 014 4M3 7h18" /></svg>
+                </div>
+            {% endif %}
+        </div>
+        <div class="md:w-1/2 p-8 flex flex-col">
+            <h1 class="text-3xl font-bold mb-2">{{ product.name }}</h1>
+            <p class="text-gray-600 mb-4">{{ product.description }}</p>
+            <div class="flex items-center mb-4">
+                <span class="text-2xl text-blue-600 font-bold mr-4">${{ product.price }}</span>
+                <span class="bg-gray-100 text-xs px-2 py-1 rounded">In stock: {{ product.inventory }}</span>
+            </div>
+            <form action="{% url 'add_to_cart' product.pk %}" method="post" class="mt-6 add-to-cart-form">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Add to Cart</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+document.querySelectorAll('.add-to-cart-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const url = this.action;
+        const csrf = this.querySelector('[name=csrfmiddlewaretoken]').value;
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrf,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                showToast('Added to cart!');
+                fetchCartCount();
+                setTimeout(() => {
+                    window.location.href = "/shop/cart/";
+                }, 500);
+            } else {
+                showToast('Could not add to cart.');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

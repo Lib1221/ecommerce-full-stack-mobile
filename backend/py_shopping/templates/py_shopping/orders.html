@@ -1,0 +1,7 @@
+{% extends 'py_shopping/base.html' %}
+{% load django_tables2 %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Your Orders</h1>
+{% render_table table %}
+{% endblock %} 
