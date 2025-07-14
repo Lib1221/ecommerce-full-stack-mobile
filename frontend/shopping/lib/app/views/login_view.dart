@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../controllers/auth_controller.dart';
+import 'package:get_storage/get_storage.dart';
 
 class LoginView extends StatefulWidget {
   @override
@@ -14,159 +16,179 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FB),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Logo/avatar
-              CircleAvatar(
-                radius: 48,
-                backgroundColor: Colors.deepPurple.shade100,
-                child: Icon(Icons.shopping_bag,
-                    size: 48, color: Colors.deepPurple),
-              ),
-              const SizedBox(height: 24),
-              // Welcome text
-              Text(
-                'Welcome Back',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple.shade800,
+    final theme = Theme.of(context);
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Logo/avatar
+                CircleAvatar(
+                  radius: 48,
+                  backgroundColor: theme.cardColor,
+                  child: Icon(Icons.shopping_bag,
+                      size: 48, color: theme.iconTheme.color?.withOpacity(0.7)),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Sign in to your account',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              // Username field
-              TextField(
-                controller: usernameController,
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  prefixIcon: Icon(Icons.person),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+                const SizedBox(height: 32),
+                // Welcome text
+                Text(
+                  'Welcome Back',
+                  style: GoogleFonts.inter(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textTheme.titleLarge?.color,
                   ),
-                  filled: true,
-                  fillColor: Colors.white,
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 20),
-              // Password field
-              TextField(
-                controller: passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+                const SizedBox(height: 8),
+                Text(
+                  'Sign in to your account',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    color: theme.textTheme.titleMedium?.color,
                   ),
-                  filled: true,
-                  fillColor: Colors.white,
+                  textAlign: TextAlign.center,
                 ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 24),
-              // Error message
-              Obx(() {
-                if (authController.error.value.isNotEmpty) {
-                  return Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.error, color: Colors.red),
-                        const SizedBox(width: 8),
-                        Expanded(
+                const SizedBox(height: 32),
+                // Username field
+                TextField(
+                  controller: usernameController,
+                  decoration: InputDecoration(
+                    labelText: 'Username',
+                    prefixIcon:
+                        Icon(Icons.person, color: theme.iconTheme.color),
+                  ),
+                  style: GoogleFonts.inter(
+                      color: theme.textTheme.bodyMedium?.color),
+                ),
+                const SizedBox(height: 20),
+                // Password field
+                TextField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: Icon(Icons.lock, color: theme.iconTheme.color),
+                  ),
+                  obscureText: true,
+                  style: GoogleFonts.inter(
+                      color: theme.textTheme.bodyMedium?.color),
+                ),
+                const SizedBox(height: 24),
+                // Error message
+                Obx(() {
+                  if (authController.error.value.isNotEmpty) {
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: theme.dividerColor),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error, color: theme.iconTheme.color),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              authController.error.value,
+                              style: GoogleFonts.inter(
+                                  color: theme.textTheme.bodyMedium?.color),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
+                // Login button
+                SizedBox(
+                  height: 54,
+                  child: Obx(() => authController.isLoading.value
+                      ? Center(
+                          child: CircularProgressIndicator(
+                              color: theme.primaryColor))
+                      : ElevatedButton(
+                          onPressed: () async {
+                            if (usernameController.text.isNotEmpty &&
+                                passwordController.text.isNotEmpty) {
+                              await authController.login(
+                                usernameController.text,
+                                passwordController.text,
+                              );
+                              // Store username after successful login
+                              if (authController.isLoggedIn) {
+                                // Use GetStorage for consistency
+                                final box = GetStorage();
+                                await box.write(
+                                    'username', usernameController.text);
+                              }
+                            } else {
+                              Get.snackbar(
+                                'Error',
+                                'Please fill in all fields',
+                                snackPosition: SnackPosition.TOP,
+                                backgroundColor:
+                                    theme.snackBarTheme.backgroundColor,
+                                colorText:
+                                    theme.snackBarTheme.contentTextStyle?.color,
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme
+                                .elevatedButtonTheme.style?.backgroundColor
+                                ?.resolve({}),
+                            foregroundColor: theme
+                                .elevatedButtonTheme.style?.foregroundColor
+                                ?.resolve({}),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 0,
+                          ),
                           child: Text(
-                            authController.error.value,
-                            style: TextStyle(color: Colors.red.shade800),
+                            'Login',
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: theme
+                                  .elevatedButtonTheme.style?.foregroundColor
+                                  ?.resolve({}),
+                            ),
                           ),
-                        ),
-                      ],
+                        )),
+                ),
+                const SizedBox(height: 20),
+                // Navigation to signup
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Don\'t have an account? ',
+                      style: GoogleFonts.inter(
+                          color: theme.textTheme.titleMedium?.color),
                     ),
-                  );
-                }
-                return const SizedBox.shrink();
-              }),
-              // Login button
-              SizedBox(
-                height: 54,
-                child: Obx(() => authController.isLoading.value
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        onPressed: () {
-                          if (usernameController.text.isNotEmpty &&
-                              passwordController.text.isNotEmpty) {
-                            authController.login(
-                              usernameController.text,
-                              passwordController.text,
-                            );
-                          } else {
-                            Get.snackbar(
-                              'Error',
-                              'Please fill in all fields',
-                              snackPosition: SnackPosition.TOP,
-                              backgroundColor: Colors.red,
-                              colorText: Colors.white,
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 4,
+                    TextButton(
+                      onPressed: () => Get.toNamed('/signup'),
+                      child: Text(
+                        'Sign Up',
+                        style: GoogleFonts.inter(
+                          color: theme.primaryColor,
+                          fontWeight: FontWeight.bold,
                         ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      )),
-              ),
-              const SizedBox(height: 20),
-              // Navigation to signup
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Don\'t have an account? ',
-                    style: TextStyle(color: Colors.grey.shade600),
-                  ),
-                  TextButton(
-                    onPressed: () => Get.toNamed('/signup'),
-                    child: Text(
-                      'Sign Up',
-                      style: TextStyle(
-                        color: Colors.deepPurple,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

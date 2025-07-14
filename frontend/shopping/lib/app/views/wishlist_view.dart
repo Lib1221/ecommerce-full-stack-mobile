@@ -1,135 +1,121 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import '../controllers/product_controller.dart';
 import '../controllers/wishlist_controller.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../controllers/product_controller.dart';
+
+String getFullImageUrl(String? url) {
+  if (url == null) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (url.startsWith('/')) return 'http://localhost:8000$url';
+  return url;
+}
 
 class WishlistView extends StatelessWidget {
-  final productController = Get.find<ProductController>();
-  final wishlistController = Get.find<WishlistController>();
+  final WishlistController wishlistController = Get.find<WishlistController>();
+  final ProductController productController = Get.find<ProductController>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FB),
-      appBar: AppBar(
-        title: const Text('Wishlist',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.deepPurple,
-        elevation: 0,
-      ),
-      body: Obx(() {
-        final favoriteIds = wishlistController.favorites;
-        final favoriteProducts = productController.products
-            .where((p) => favoriteIds.contains(p['id']))
-            .toList();
-        if (favoriteProducts.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.favorite_border, size: 60, color: Colors.grey),
-                SizedBox(height: 16),
-                Text('Your wishlist is empty',
-                    style: TextStyle(fontSize: 18, color: Colors.grey)),
-              ],
+    final theme = Theme.of(context);
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: theme.scaffoldBackgroundColor,
+          elevation: 0,
+          title: Text(
+            'Wishlist',
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+              color: theme.textTheme.titleLarge?.color,
             ),
-          );
-        }
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: GridView.builder(
-            itemCount: favoriteProducts.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.7,
-            ),
-            itemBuilder: (context, index) {
-              final product = favoriteProducts[index];
-              return GestureDetector(
-                onTap: () => Get.toNamed('/product-details', arguments: product),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+          ),
+          centerTitle: true,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Obx(() {
+            final favIds = wishlistController.favorites.toList();
+            final products = productController.products
+                .where((p) => favIds.contains(p['id']))
+                .toList();
+            if (products.isEmpty) {
+              return Center(
+                child: Text('Your wishlist is empty',
+                    style: GoogleFonts.inter(fontSize: 18)),
+              );
+            }
+            return ListView.separated(
+              itemCount: products.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 16),
+              itemBuilder: (context, index) {
+                final product = products[index];
+                final isFav = wishlistController.isFavorite(product['id']);
+                return GestureDetector(
+                  onTap: () =>
+                      Get.toNamed('/product-details', arguments: product),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: theme.dividerColor),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
                       children: [
+                        product['image'] != null
+                            ? Hero(
+                                tag: 'product_${product['id']}',
+                                child: Image.network(
+                                    getFullImageUrl(product['image']),
+                                    height: 40,
+                                    width: 40,
+                                    fit: BoxFit.contain))
+                            : Icon(Icons.image,
+                                size: 40,
+                                color: theme.iconTheme.color?.withOpacity(0.3)),
+                        const SizedBox(width: 16),
                         Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: product['image'] != null
-                                ? CachedNetworkImage(
-                                    imageUrl: product['image'],
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Container(
-                                      color: Colors.grey.shade200,
-                                      child: const Center(
-                                          child: CircularProgressIndicator(
-                                              strokeWidth: 2)),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        Container(
-                                      color: Colors.grey.shade100,
-                                      child: const Icon(Icons.image_not_supported,
-                                          size: 48, color: Colors.grey),
-                                    ),
-                                  )
-                                : Container(
-                                    color: Colors.grey.shade100,
-                                    child: const Icon(Icons.image_not_supported,
-                                        size: 48, color: Colors.grey),
-                                  ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          product['name'],
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$${product['price']}',
-                          style: const TextStyle(
-                              color: Colors.deepPurple,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15),
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          height: 38,
-                          child: ElevatedButton(
-                            onPressed: () => wishlistController
-                                .removeFromWishlist(product['id']),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product['name'] ?? '',
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.textTheme.bodyLarge?.color,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              elevation: 2,
-                            ),
-                            child: const Text('Remove',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              Text(
+                                product['price'] != null
+                                    ? '\$${product['price']}'
+                                    : '',
+                                style: GoogleFonts.inter(
+                                  color: theme.textTheme.bodyMedium?.color,
+                                ),
+                              ),
+                            ],
                           ),
+                        ),
+                        Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: isFav
+                              ? theme.primaryColor
+                              : theme.iconTheme.color,
                         ),
                       ],
                     ),
                   ),
-                ),
-              );
-            },
-          ),
-        );
-      }),
+                );
+              },
+            );
+          }),
+        ),
+      ),
     );
   }
 }

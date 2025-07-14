@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import '../services/api_service.dart';
 import 'package:flutter/material.dart';
-import '../views/order_history_view.dart';
 
 class CartController extends GetxController {
   var items = [].obs;
@@ -114,9 +113,9 @@ class CartController extends GetxController {
       items.value = []; // Clear cart in UI immediately
       await fetchCart(); // Refresh cart after checkout
       // Refresh orders after checkout
-      if (Get.isRegistered<OrderController>()) {
-        Get.find<OrderController>().fetchOrders();
-      }
+      // if (Get.isRegistered<OrderController>()) {
+      //   Get.find<OrderController>().fetchOrders();
+      // }
       Get.snackbar(
         'Success',
         'Order placed successfully!',

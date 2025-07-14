@@ -36,8 +36,6 @@ class AppPages {
     GetPage(name: Routes.PROFILE, page: () => ProfileView()),
     GetPage(name: Routes.WISHLIST, page: () => WishlistView()),
     GetPage(name: Routes.ORDERS, page: () => OrderHistoryView()),
-    GetPage(
-        name: Routes.PRODUCT_DETAILS,
-        page: () => ProductDetailsView(product: Get.arguments)),
+    GetPage(name: Routes.PRODUCT_DETAILS, page: () => ProductDetailsView()),
   ];
 }
