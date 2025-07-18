@@ -22,7 +22,6 @@ api_urlpatterns = [
     path('cart/add/', views.add_to_cart_api, name='add_to_cart_api'),
     path('cart/update/<int:item_id>/', views.update_cart_item_api, name='update_cart_item_api'),
     path('cart/remove/<int:item_id>/', views.remove_from_cart_api, name='remove_from_cart_api'),
-    path('cart/checkout/', views.checkout_api, name='checkout_api'),
     
     # Product APIs
     path('products/<int:pk>/detail/', views.product_detail_api, name='product_detail_api'),
@@ -44,6 +43,5 @@ urlpatterns = [
     path('cart/', views.cart_page, name='cart_page'),
     path('orders/', views.orders_page, name='orders_page'),
     path('cart/count/', views.cart_count, name='cart_count'),
-    path('create-payment-intent/', views.create_payment_intent),
 
 ]

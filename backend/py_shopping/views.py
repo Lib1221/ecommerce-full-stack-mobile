@@ -318,43 +318,6 @@ def remove_from_cart_api(request, item_id):
             'error': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def checkout_api(request):
-    """API endpoint to checkout and create order"""
-    try:
-        cart, _ = Cart.objects.get_or_create(user=request.user)
-        cart_items = cart.items.all()
-        
-        if not cart_items.exists():
-            return Response({
-                'error': 'Cart is empty'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Create order
-        order = Order.objects.create(user=request.user, status='pending')
-        
-        # Create order items
-        for cart_item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                product=cart_item.product,
-                quantity=cart_item.quantity
-            )
-        
-        # Clear cart
-        cart.items.all().delete()
-        
-        return Response({
-            'message': 'Order created successfully',
-            'order': OrderSerializer(order).data
-        }, status=status.HTTP_201_CREATED)
-        
-    except Exception as e:
-        return Response({
-            'error': str(e)
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def product_detail_api(request, pk):
@@ -513,29 +476,3 @@ def homepage_api(request):
     products = Product.objects.all()
     data = ProductSerializer(products, many=True).data
     return Response(data)
-
-
-import stripe
-from django.conf import settings
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-
-stripe.api_key = settings.STRIPE_SECRET_KEY
-
-@api_view(['POST'])
-def create_payment_intent(request):
-    try:
-        data = request.data
-        amount = int(data.get('amount', 0))
-        intent = stripe.PaymentIntent.create(
-            amount=amount,
-            currency='usd',
-            automatic_payment_methods={"enabled": True},
-        )
-
-        return Response({
-            'clientSecret': intent['client_secret']
-        })
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=400)

@@ -123,9 +123,4 @@ LOGIN_URL = '/shop/login/'
 
 MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
 CORS_ALLOW_ALL_ORIGINS = True
-# settings.py
-STRIPE_SECRET_KEY = 'sk_test_51QCqhAIn212ReFWzxTokWLScSzyvT33BIglmHzELsQis6YxTZC04bjZDbOo8S2IhHehB86AA60PNUDY1QSm6UNfh00SPlm6p6z'
-STRIPE_PUBLISHABLE_KEY = 'pk_test_51QCqhAIn212ReFWzcVspm505bU1fbSLo2WamdHn2Vv9ocOeZYXBCq6FaMrT2Gx6dUVrH5bUr9nUShkzEhltZ80Ey00Az5MELVV'
-
-STRIPE_SUCCESS_URL = 'http://localhost:8000/success'
-STRIPE_CANCEL_URL = 'http://localhost:8000/cancel'
+ALLOWED_HOSTS = ['192.168.81.110', 'localhost', '127.0.0.1']
