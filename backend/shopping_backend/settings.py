@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-n%y46f*z0_o5ntd3!(xhcaeqtko@2cn2o9h!4f9yei--ogw()o
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['192.168.81.110', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -140,8 +140,7 @@ LOGOUT_REDIRECT_URL = '/shop/login/'
 LOGIN_URL = '/shop/login/'
 
 MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
-CORS_ALLOW_ALL_ORIGINS = True
-ALLOWED_HOSTS = ['192.168.81.110', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': config('CLOUDINARY_API_KEY'),
@@ -149,3 +148,4 @@ CLOUDINARY_STORAGE = {
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+CORS_ALLOW_ALL_ORIGINS = True
