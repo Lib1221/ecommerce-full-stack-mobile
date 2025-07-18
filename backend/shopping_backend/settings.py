@@ -55,6 +55,7 @@ WSGI_APPLICATION = 'shopping_backend.wsgi.application'
 import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qsl
+from decouple import config
 
 load_dotenv()
 
@@ -110,6 +111,8 @@ INSTALLED_APPS += [
     'crispy_bootstrap4',
     'django_tables2',
     'corsheaders',
+     'cloudinary',
+    'cloudinary_storage',
 ]
 
 REST_FRAMEWORK = {
@@ -139,3 +142,10 @@ LOGIN_URL = '/shop/login/'
 MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
 CORS_ALLOW_ALL_ORIGINS = True
 ALLOWED_HOSTS = ['192.168.81.110', 'localhost', '127.0.0.1']
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': config('CLOUDINARY_API_KEY'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
