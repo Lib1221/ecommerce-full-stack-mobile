@@ -19,6 +19,7 @@ class _SignupViewState extends State<SignupView> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final AuthController authController = Get.find<AuthController>();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -70,53 +71,58 @@ class _SignupViewState extends State<SignupView> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: kSectionSpacing),
-                // Username field
-                TextField(
-                  controller: usernameController,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    prefixIcon:
-                        Icon(Icons.person, color: theme.iconTheme.color),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: usernameController,
+                        decoration: InputDecoration(
+                          labelText: 'Username',
+                          prefixIcon: Icon(Icons.person),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Please enter your username'
+                            : null,
+                      ),
+                      SizedBox(height: kItemSpacing),
+                      TextFormField(
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.email),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Please enter your email'
+                            : null,
+                      ),
+                      SizedBox(height: kItemSpacing),
+                      TextFormField(
+                        controller: passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: Icon(Icons.lock),
+                        ),
+                        obscureText: true,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Please enter your password'
+                            : null,
+                      ),
+                      SizedBox(height: kItemSpacing),
+                      TextFormField(
+                        controller: confirmPasswordController,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                          prefixIcon: Icon(Icons.lock_outline),
+                        ),
+                        obscureText: true,
+                        validator: (value) => value != passwordController.text
+                            ? 'Passwords do not match'
+                            : null,
+                      ),
+                    ],
                   ),
-                  style: GoogleFonts.inter(
-                      color: theme.textTheme.bodyMedium?.color),
-                ),
-                const SizedBox(height: kItemSpacing),
-                // Email field
-                TextField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email, color: theme.iconTheme.color),
-                  ),
-                  style: GoogleFonts.inter(
-                      color: theme.textTheme.bodyMedium?.color),
-                ),
-                const SizedBox(height: kItemSpacing),
-                // Password field
-                TextField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock, color: theme.iconTheme.color),
-                  ),
-                  obscureText: true,
-                  style: GoogleFonts.inter(
-                      color: theme.textTheme.bodyMedium?.color),
-                ),
-                const SizedBox(height: kItemSpacing),
-                // Confirm Password field
-                TextField(
-                  controller: confirmPasswordController,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm Password',
-                    prefixIcon:
-                        Icon(Icons.lock_outline, color: theme.iconTheme.color),
-                  ),
-                  obscureText: true,
-                  style: GoogleFonts.inter(
-                      color: theme.textTheme.bodyMedium?.color),
                 ),
                 const SizedBox(height: kSectionSpacing),
                 // Error message
@@ -150,27 +156,12 @@ class _SignupViewState extends State<SignupView> {
                 // Signup button
                 AnimatedButton(
                   onTap: () {
-                    if (usernameController.text.isNotEmpty &&
-                        emailController.text.isNotEmpty &&
-                        passwordController.text.isNotEmpty &&
-                        confirmPasswordController.text.isNotEmpty) {
-                      if (passwordController.text ==
-                          confirmPasswordController.text) {
-                        authController.signup(
-                          usernameController.text,
-                          emailController.text,
-                          passwordController.text,
-                        );
-                      } else {
-                        Get.snackbar(
-                          'Error',
-                          'Passwords do not match',
-                          snackPosition: SnackPosition.TOP,
-                          backgroundColor: theme.snackBarTheme.backgroundColor,
-                          colorText:
-                              theme.snackBarTheme.contentTextStyle?.color,
-                        );
-                      }
+                    if (_formKey.currentState?.validate() ?? false) {
+                      authController.signup(
+                        usernameController.text,
+                        emailController.text,
+                        passwordController.text,
+                      );
                     } else {
                       Get.snackbar(
                         'Error',
@@ -217,7 +208,7 @@ class _SignupViewState extends State<SignupView> {
                           color: theme.textTheme.titleMedium?.color),
                     ),
                     TextButton(
-                      onPressed: () => Get.toNamed('/login'),
+                      onPressed: () => Get.offAllNamed('/login'),
                       child: Text(
                         'Login',
                         style: GoogleFonts.inter(

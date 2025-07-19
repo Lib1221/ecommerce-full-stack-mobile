@@ -1,6 +1,5 @@
 // ignore_for_file: constant_identifier_names
 import 'package:get/get.dart';
-import '../presentation/pages/cart_view.dart';
 import '../presentation/pages/login_view.dart';
 import '../presentation/pages/signup_view.dart';
 import '../presentation/pages/profile_view.dart';
@@ -9,7 +8,7 @@ import '../presentation/pages/product_details_view.dart';
 import 'presentation/pages/main_navigation.dart';
 import 'presentation/pages/product_list_view.dart';
 import 'presentation/pages/wishlist_view.dart';
-
+import '../presentation/pages/cartview/cart_view.dart';
 
 class Routes {
   static const MAIN_NAV = '/main-nav';

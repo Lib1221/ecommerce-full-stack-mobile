@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../presentation/controllers/product_controller.dart';
-import './modern_app_bar.dart';
 import './error_display.dart';
+import 'homepage_view.dart'; // Import ProductCard
+import '../../presentation/controllers/cart_controller.dart'; // Import CartController
 
 class ProductListView extends StatefulWidget {
   const ProductListView({super.key});
@@ -14,6 +15,7 @@ class ProductListView extends StatefulWidget {
 
 class _ProductListViewState extends State<ProductListView> {
   final ProductController productController = Get.find<ProductController>();
+  final CartController cartController = Get.find<CartController>();
   final TextEditingController searchController = TextEditingController();
   RxList products = [].obs;
   RxBool isSearching = false.obs;
@@ -57,121 +59,68 @@ class _ProductListViewState extends State<ProductListView> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
-        appBar: ModernAppBar(
-          title: 'Products',
-          actions: [
-            IconButton(
-              icon: Icon(Icons.grid_view),
-              onPressed: () {},
-            ),
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              // Search bar
-              TextField(
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: TextFormField(
                 controller: searchController,
                 onChanged: _onSearch,
                 decoration: InputDecoration(
                   hintText: 'Search products...',
-                  prefixIcon: Icon(Icons.search, color: theme.iconTheme.color),
-                  filled: true,
-                  fillColor: theme.cardColor,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  prefixIcon: Icon(Icons.search),
                 ),
-                style:
-                    GoogleFonts.inter(color: theme.textTheme.bodyMedium?.color),
               ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: Obx(() {
-                  if (productController.isLoading.value) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (productController.error.isNotEmpty) {
-                    return ErrorDisplay(
-                      message:
-                          'Failed to load products. Please check your connection and try again.',
-                      onRetry: () => productController.fetchProducts(),
-                    );
-                  }
-                  if (products.isEmpty) {
-                    return Center(
-                        child: Text('No products found',
-                            style: GoogleFonts.inter()));
-                  }
-                  return GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Get.toNamed('/product-details', arguments: product);
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: theme.cardColor,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: theme.dividerColor),
-                          ),
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              product['image'] != null
-                                  ? Hero(
-                                      tag: 'product_${product['id']}',
-                                      child: Image.network(
-                                          getFullImageUrl(product['image']),
-                                          height: 60,
-                                          fit: BoxFit.contain))
-                                  : Icon(Icons.image,
-                                      size: 48,
-                                      color: theme.iconTheme.color
-                                          ?.withOpacity(0.3)),
-                              const SizedBox(height: 12),
-                              Text(
-                                product['name'] ?? '',
-                                style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.textTheme.bodyLarge?.color,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                product['price'] != null
-                                    ? '\$${product['price']}'
-                                    : '',
-                                style: GoogleFonts.inter(
-                                  color: theme.textTheme.bodyMedium?.color,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: Obx(() {
+                if (productController.isLoading.value) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (productController.error.isNotEmpty) {
+                  return ErrorDisplay(
+                    message:
+                        'Failed to load products. Please check your connection and try again.',
+                    onRetry: () => productController.fetchProducts(),
                   );
-                }),
-              ),
-            ],
-          ),
+                }
+                if (products.isEmpty) {
+                  return Center(
+                      child: Text('No products found',
+                          style: GoogleFonts.inter()));
+                }
+                return GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.75,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return ProductCard(
+                      product: product,
+                      onTap: () =>
+                          Get.toNamed('/product-details', arguments: product),
+                      onAddToCart: () {
+                        cartController.addToCart(product['id']);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${product['name']} added to cart!',
+                                style: GoogleFonts.inter()),
+                            duration: const Duration(seconds: 1),
+                            backgroundColor: theme.primaryColor,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
         ),
       ),
     );

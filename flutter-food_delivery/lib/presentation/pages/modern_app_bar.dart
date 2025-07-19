@@ -11,52 +11,67 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.title,
     this.actions,
-    this.centerTitle = true,
+    this.centerTitle = false, // Default to left-aligned
     this.leading,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [theme.primaryColor, theme.primaryColor.withOpacity(0.85)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(24),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.primaryColor.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
+    return Material(
+      color: theme.scaffoldBackgroundColor,
+      elevation: 0,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 56,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (leading != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: leading,
+                  )
+                else if (Navigator.of(context).canPop())
+                  IconButton(
+                    icon: Icon(Icons.arrow_back_ios_new_rounded,
+                        color: theme.iconTheme.color),
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 20,
+                      color: theme.textTheme.titleLarge?.color,
+                      letterSpacing: 0.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (actions != null)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: actions!,
+                  ),
+                const SizedBox(width: 8),
+              ],
+            ),
           ),
+          Divider(
+              height: 1,
+              thickness: 1,
+              color: theme.dividerColor.withOpacity(0.12)),
         ],
-      ),
-      child: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          title,
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            color: Colors.white,
-            letterSpacing: 0.5,
-          ),
-        ),
-        centerTitle: centerTitle,
-        actions: actions,
-        leading: leading,
-        iconTheme: IconThemeData(color: Colors.white),
-        automaticallyImplyLeading: leading == null,
       ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(72);
+  Size get preferredSize => const Size.fromHeight(57);
 }

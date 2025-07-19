@@ -19,6 +19,7 @@ class _LoginViewState extends State<LoginView> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final AuthController authController = Get.find<AuthController>();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +29,6 @@ class _LoginViewState extends State<LoginView> {
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: ModernAppBar(
           title: 'Login',
-          actions: [
-            IconButton(
-              icon: Icon(Icons.login),
-              onPressed: () {},
-            ),
-          ],
         ),
         body: Center(
           child: SingleChildScrollView(
@@ -70,28 +65,34 @@ class _LoginViewState extends State<LoginView> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: kSectionSpacing),
-                // Username field
-                TextField(
-                  controller: usernameController,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    prefixIcon:
-                        Icon(Icons.person, color: theme.iconTheme.color),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: usernameController,
+                        decoration: InputDecoration(
+                          labelText: 'Username',
+                          prefixIcon: Icon(Icons.person),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Please enter your username'
+                            : null,
+                      ),
+                      SizedBox(height: kItemSpacing),
+                      TextFormField(
+                        controller: passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: Icon(Icons.lock),
+                        ),
+                        obscureText: true,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Please enter your password'
+                            : null,
+                      ),
+                    ],
                   ),
-                  style: GoogleFonts.inter(
-                      color: theme.textTheme.bodyMedium?.color),
-                ),
-                SizedBox(height: kItemSpacing),
-                // Password field
-                TextField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock, color: theme.iconTheme.color),
-                  ),
-                  obscureText: true,
-                  style: GoogleFonts.inter(
-                      color: theme.textTheme.bodyMedium?.color),
                 ),
                 SizedBox(height: kSectionSpacing),
                 // Error message
@@ -113,15 +114,13 @@ class _LoginViewState extends State<LoginView> {
                               color: theme.primaryColor))
                       : AnimatedButton(
                           onTap: () async {
-                            if (usernameController.text.isNotEmpty &&
-                                passwordController.text.isNotEmpty) {
+                            if (_formKey.currentState?.validate() ?? false) {
                               await authController.login(
                                 usernameController.text,
                                 passwordController.text,
                               );
                               // Store username after successful login
                               if (authController.isLoggedIn) {
-                                // Use GetStorage for consistency
                                 final box = GetStorage();
                                 await box.write(
                                     'username', usernameController.text);
@@ -177,7 +176,7 @@ class _LoginViewState extends State<LoginView> {
                           color: theme.textTheme.titleMedium?.color),
                     ),
                     TextButton(
-                      onPressed: () => Get.toNamed('/signup'),
+                      onPressed: () => Get.offAllNamed('/signup'),
                       child: Text(
                         'Sign Up',
                         style: GoogleFonts.inter(

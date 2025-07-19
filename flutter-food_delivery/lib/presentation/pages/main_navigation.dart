@@ -1,8 +1,9 @@
+
+import 'package:check/presentation/pages/cartview/cart_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'homepage_view.dart';
 import 'product_list_view.dart';
-import 'cart_view.dart';
 import 'profile_view.dart';
 
 class MainNavigation extends StatefulWidget {

@@ -14,11 +14,26 @@ final ThemeData lightTheme = ThemeData(
   ),
   inputDecorationTheme: InputDecorationTheme(
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(100),
       borderSide: BorderSide.none,
     ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(100),
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(100),
+      borderSide: BorderSide(color: Colors.blueAccent, width: 2),
+    ),
     filled: true,
-    fillColor: Colors.grey[100],
+    fillColor: Colors.white,
+    contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+    hintStyle: GoogleFonts.inter(color: Colors.grey[500]),
+    labelStyle: GoogleFonts.inter(color: Colors.grey[700]),
+    floatingLabelStyle: GoogleFonts.inter(
+        color: Colors.blueAccent, fontWeight: FontWeight.bold),
+    // Add a subtle shadow
+    // (Flutter doesn't support shadow directly in InputDecorationTheme, but the border and fill will look modern)
   ),
   appBarTheme: AppBarTheme(
     elevation: 0,
@@ -41,11 +56,24 @@ final ThemeData darkTheme = ThemeData(
   ),
   inputDecorationTheme: InputDecorationTheme(
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(100),
       borderSide: BorderSide.none,
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(100),
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(100),
+      borderSide: BorderSide(color: Colors.deepPurpleAccent, width: 2),
     ),
     filled: true,
     fillColor: Colors.grey[900],
+    contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+    hintStyle: GoogleFonts.inter(color: Colors.grey[400]),
+    labelStyle: GoogleFonts.inter(color: Colors.grey[300]),
+    floatingLabelStyle: GoogleFonts.inter(
+        color: Colors.deepPurpleAccent, fontWeight: FontWeight.bold),
   ),
   appBarTheme: AppBarTheme(
     elevation: 0,

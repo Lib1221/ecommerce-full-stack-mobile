@@ -11,6 +11,119 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/ui_constants.dart';
 import './cart_icon_with_badge.dart';
 
+// Move ProductCard to the top-level, before HomepageView
+class ProductCard extends StatelessWidget {
+  final Map<String, dynamic> product;
+  final VoidCallback onTap;
+  final VoidCallback onAddToCart;
+  const ProductCard(
+      {super.key,
+      required this.product,
+      required this.onTap,
+      required this.onAddToCart});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: theme.shadowColor.withOpacity(0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
+          border: Border.all(color: theme.dividerColor.withOpacity(0.15)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Large image area
+            Expanded(
+              flex: 6,
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(24)),
+                child: product['image'] != null
+                    ? Hero(
+                        tag: 'product_${product['id']}',
+                        child: CachedNetworkImage(
+                          imageUrl: product['image'],
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          placeholder: (context, url) => Container(
+                            color: theme.dividerColor,
+                            child: const Center(
+                                child: CircularProgressIndicator()),
+                          ),
+                          errorWidget: (context, url, error) => Icon(
+                            Icons.broken_image,
+                            size: 64,
+                            color: theme.iconTheme.color?.withOpacity(0.3),
+                          ),
+                        ),
+                      )
+                    : Icon(Icons.image,
+                        size: 64,
+                        color: theme.iconTheme.color?.withOpacity(0.3)),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product['name'] ?? '',
+                    style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: theme.textTheme.bodyLarge?.color),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    product['price'] != null ? '\$${product['price']}' : '',
+                    style: GoogleFonts.inter(
+                        fontSize: 15, color: theme.textTheme.bodyMedium?.color),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: ElevatedButton.icon(
+                      onPressed: onAddToCart,
+                      icon: const Icon(Icons.add_shopping_cart, size: 20),
+                      label: Text('Add to Cart',
+                          style:
+                              GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        textStyle: GoogleFonts.inter(
+                            fontSize: 14, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class HomepageView extends StatelessWidget {
   final ProductController productController = Get.put(ProductController());
   final CategoryController categoryController = Get.put(CategoryController());
@@ -248,117 +361,22 @@ class HomepageView extends StatelessWidget {
                         itemCount: products.length,
                         itemBuilder: (context, index) {
                           final product = products[index];
-                          return AnimatedScale(
-                            scale: 1.0,
-                            duration: const Duration(milliseconds: 350),
-                            curve: Curves.easeOutBack,
-                            child: GestureDetector(
-                              onTap: () => Get.toNamed('/product-details',
-                                  arguments: product),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: theme.cardColor,
-                                  borderRadius:
-                                      BorderRadius.circular(kCardRadius),
-                                  border: Border.all(color: theme.dividerColor),
+                          return ProductCard(
+                            product: product,
+                            onTap: () => Get.toNamed('/product-details',
+                                arguments: product),
+                            onAddToCart: () {
+                              cartController.addToCart(product['id']);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      '${product['name']} added to cart!',
+                                      style: GoogleFonts.inter()),
+                                  duration: const Duration(seconds: 1),
+                                  backgroundColor: theme.primaryColor,
                                 ),
-                                padding: const EdgeInsets.all(kCardPadding),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      flex: 4,
-                                      child: product['image'] != null
-                                          ? Hero(
-                                              tag: 'product_${product['id']}',
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                                child: CachedNetworkImage(
-                                                  imageUrl: product['image'],
-                                                  fit: BoxFit.cover,
-                                                  width: double.infinity,
-                                                  placeholder: (context, url) =>
-                                                      Container(
-                                                    color: theme.dividerColor,
-                                                    child: Center(
-                                                        child:
-                                                            CircularProgressIndicator()),
-                                                  ),
-                                                  errorWidget:
-                                                      (context, url, error) =>
-                                                          Icon(
-                                                    Icons.broken_image,
-                                                    size: 40,
-                                                    color: theme.iconTheme.color
-                                                        ?.withOpacity(0.3),
-                                                  ),
-                                                ),
-                                              ),
-                                            )
-                                          : Icon(Icons.image,
-                                              size: 40,
-                                              color: theme.iconTheme.color
-                                                  ?.withOpacity(0.3)),
-                                    ),
-                                    SizedBox(height: kItemSpacing),
-                                    Text(
-                                      product['name'] ?? '',
-                                      style: GoogleFonts.inter(
-                                        fontWeight: FontWeight.bold,
-                                        color: theme.textTheme.bodyLarge?.color,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    SizedBox(height: kItemSpacing),
-                                    Text(
-                                      product['price'] != null
-                                          ? '\$${product['price']}'
-                                          : '',
-                                      style: GoogleFonts.inter(
-                                        color:
-                                            theme.textTheme.bodyMedium?.color,
-                                      ),
-                                    ),
-                                    SizedBox(height: kItemSpacing),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        cartController.addToCart(product['id']);
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              '${product['name']} added to cart!',
-                                              style: GoogleFonts.inter(),
-                                            ),
-                                            duration: Duration(seconds: 1),
-                                            backgroundColor: theme.primaryColor,
-                                          ),
-                                        );
-                                      },
-                                      icon: Icon(Icons.add_shopping_cart),
-                                      label: Text('Add to Cart',
-                                          style: GoogleFonts.inter(
-                                              fontWeight: FontWeight.bold)),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: theme.primaryColor,
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12)),
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 4),
-                                        textStyle: GoogleFonts.inter(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                              );
+                            },
                           );
                         },
                       ),
