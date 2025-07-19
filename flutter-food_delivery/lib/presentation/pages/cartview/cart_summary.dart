@@ -5,12 +5,12 @@ import '../../../core/ui_constants.dart';
 class CartSummary extends StatelessWidget {
   final int totalItems;
   final double totalPrice;
-  final TextEditingController couponController;
+  final VoidCallback onPay;
   const CartSummary(
       {super.key,
       required this.totalItems,
       required this.totalPrice,
-      required this.couponController});
+      required this.onPay});
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +49,9 @@ class CartSummary extends StatelessWidget {
           SizedBox(
             height: 56,
             child: ElevatedButton.icon(
-              onPressed: () {
-                // UI only, no backend logic
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Checkout (UI only)')),
-                );
-              },
+              onPressed: onPay,
               icon: Icon(Icons.payment),
-              label: Text('Checkout',
+              label: Text('Pay with Stripe',
                   style: GoogleFonts.inter(
                       fontWeight: FontWeight.bold, fontSize: 18)),
               style: ElevatedButton.styleFrom(

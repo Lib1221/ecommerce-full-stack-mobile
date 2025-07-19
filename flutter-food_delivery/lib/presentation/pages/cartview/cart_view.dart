@@ -10,6 +10,7 @@ import '../../../core/ui_constants.dart';
 import 'cart_item_tile.dart';
 import 'cart_empty.dart';
 import 'cart_summary.dart';
+import 'package:check/payment/pay.dart';
 
 class CartView extends StatelessWidget {
   final CartController cartController = Get.find<CartController>();
@@ -108,7 +109,29 @@ class CartView extends StatelessWidget {
                   CartSummary(
                     totalItems: totalItems,
                     totalPrice: totalPrice,
-                    couponController: couponController,
+                    onPay: () async {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) =>
+                            const Center(child: CircularProgressIndicator()),
+                      );
+                      try {
+                        await Stripeservice.instance
+                            .makePayment(totalPrice.round());
+                        if (Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop(); // remove loader
+                        }
+                        // Do not call checkout here; handled in Stripe service
+                      } catch (e) {
+                        if (Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Payment failed: $e')),
+                        );
+                      }
+                    },
                   ),
                 ],
               );

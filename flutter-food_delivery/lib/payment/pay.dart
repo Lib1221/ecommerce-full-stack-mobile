@@ -3,26 +3,35 @@
 import 'package:check/payment/key.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:get/get.dart';
+import '../../presentation/controllers/cart_controller.dart'; // adjust path as needed
 
 class Stripeservice {
   Stripeservice._();
   static final Stripeservice instance = Stripeservice._();
 
+  String? _clientSecret;
+
   Future<void> makePayment(int money) async {
     try {
       String? result = await createPaymentIntent(money, "usd");
       if (result == null) {
-        print("$result");
+        print("❌ Failed to get client secret");
         return;
       } else {
+        _clientSecret = result;
+
         await Stripe.instance.initPaymentSheet(
-            paymentSheetParameters: SetupPaymentSheetParameters(
-                paymentIntentClientSecret: result,
-                merchantDisplayName: "Liben Adugna"));
+          paymentSheetParameters: SetupPaymentSheetParameters(
+            paymentIntentClientSecret: result,
+            merchantDisplayName: "Liben Adugna",
+          ),
+        );
+
         await processpayment();
       }
     } catch (e) {
-      print("Error in makePayment: ${e.toString()}");
+      print("❌ Error in makePayment: ${e.toString()}");
     }
   }
 
@@ -40,19 +49,19 @@ class Stripeservice {
         options: Options(
           contentType: Headers.formUrlEncodedContentType,
           headers: {
-            "Authorization":"Bearer $stripeSecretKey", // Ensure this variable is defined in your constants
+            "Authorization": "Bearer $stripeSecretKey",
             "Content-Type": 'application/x-www-form-urlencoded',
           },
         ),
       );
 
       if (response.data != null) {
-        print("Response from Stripe: ${response.data}");
-        return response.data['client_secret']; // Return the client secret for further processing
+        print("✅ Created PaymentIntent: ${response.data}");
+        return response.data['client_secret'];
       }
       return null;
     } catch (e) {
-      print("Error in createPaymentIntent: ${e.toString()}");
+      print("❌ Error in createPaymentIntent: ${e.toString()}");
     }
     return null;
   }
@@ -60,8 +69,27 @@ class Stripeservice {
   Future<void> processpayment() async {
     try {
       await Stripe.instance.presentPaymentSheet();
+
+      // ✅ Check payment intent status
+      if (_clientSecret != null) {
+        final paymentIntent = await Stripe.instance.retrievePaymentIntent(_clientSecret!);
+final status = paymentIntent.status;
+
+print("🎯 PaymentIntent Status: $status");
+
+if (status == PaymentIntentsStatus.Succeeded) {
+  print("✅ Payment succeeded!");
+  await Get.find<CartController>().checkout();
+} else {
+  print("⚠️ Payment not successful: $status");
+}
+
+}
+
+    } on StripeException catch (e) {
+      print("❌ Payment failed: ${e.error.localizedMessage}");
     } catch (e) {
-      print(e.toString());
+      print("❌ Error in processpayment: ${e.toString()}");
     }
   }
 
@@ -70,8 +98,6 @@ class Stripeservice {
     return calculatedAmount.toString();
   }
 }
-
-  
 
 Future<void> setup() async {
   Stripe.publishableKey = stripePublishableKey;
