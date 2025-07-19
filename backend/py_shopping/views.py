@@ -19,6 +19,9 @@ from django.db import models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework import status
+from .serializers import (
+    UserSerializer, CategorySerializer, ProductSerializer, CartItemSerializer, CartSerializer, OrderItemSerializer, OrderSerializer
+)
 
 # ===== Permissions =====
 class IsSeller(permissions.BasePermission):
@@ -30,72 +33,6 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         if request.method in SAFE_METHODS:
             return True
         return request.user and request.user.is_staff
-
-
-# ===== Serializers =====
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ['id', 'username', 'email', 'role']
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = '__all__'
-
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = '__all__'
-
-class CartItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='product.name', read_only=True)
-    product_price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
-    product_image = serializers.CharField(source='product.image', read_only=True)
-    
-    class Meta:
-        model = CartItem
-        fields = ['id', 'product', 'product_name', 'product_price', 'product_image', 'quantity']
-
-class CartSerializer(serializers.ModelSerializer):
-    items = CartItemSerializer(many=True, read_only=True)
-    total_items = serializers.SerializerMethodField()
-    total_price = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Cart
-        fields = ['id', 'user', 'items', 'total_items', 'total_price']
-    
-    def get_total_items(self, obj):
-        return obj.items.aggregate(total=models.Sum('quantity'))['total'] or 0
-    
-    def get_total_price(self, obj):
-        total = 0
-        for item in obj.items.all():
-            total += item.product.price * item.quantity
-        return total
-
-class OrderItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='product.name', read_only=True)
-    product_price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
-    
-    class Meta:
-        model = OrderItem
-        fields = ['id', 'product', 'product_name', 'product_price', 'quantity']
-
-class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, read_only=True)
-    total_price = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Order
-        fields = ['id', 'user', 'items', 'total_price', 'status', 'created_at']
-
-    def get_total_price(self, obj):
-        total = 0
-        for item in obj.items.all():
-            total += item.product.price * item.quantity
-        return total
 
 
 # ===== API Views =====
@@ -460,15 +397,8 @@ def cart_count(request):
 def cart_items_api(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
     items = cart.items.select_related('product').all()
-    data = [
-        {
-            'product': item.product.name if item.product else '',
-            'quantity': item.quantity,
-            'price': str(item.product.price) if item.product else '',
-        }
-        for item in items
-    ]
-    return Response(data)
+    serializer = CartItemSerializer(items, many=True)
+    return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
