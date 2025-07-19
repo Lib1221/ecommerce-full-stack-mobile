@@ -27,7 +27,6 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   Map<String, dynamic>? product;
   List<dynamic> relatedProducts = [];
   bool isLoadingRelated = true;
-  bool isAddingToCart = false;
 
   @override
   void initState() {
@@ -215,44 +214,11 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
               SizedBox(height: kSectionSpacing),
               // Add to Cart Button
               AnimatedButton(
-                onTap: () async {
-                  if (isAddingToCart) return;
-                  setState(() {
-                    isAddingToCart = true;
-                  });
-                  try {
-                    await cartController.addToCart(product!['id']);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content:
-                            Text('Added to cart!', style: GoogleFonts.inter()),
-                        backgroundColor: theme.primaryColor,
-                        duration: Duration(seconds: 1),
-                      ),
-                    );
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Failed to add to cart',
-                            style: GoogleFonts.inter()),
-                        backgroundColor: Colors.red,
-                        duration: Duration(seconds: 1),
-                      ),
-                    );
-                  } finally {
-                    setState(() {
-                      isAddingToCart = false;
-                    });
-                  }
+                onTap: () {
+                  cartController.addToCart(product!['id']);
                 },
                 child: ElevatedButton.icon(
-                  icon: isAddingToCart
-                      ? SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : Icon(Icons.add_shopping_cart, size: 22),
+                  icon: Icon(Icons.add_shopping_cart, size: 22),
                   label: Text('Add to Cart',
                       style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold, fontSize: 18)),
@@ -267,7 +233,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                         borderRadius: BorderRadius.circular(kCardRadius)),
                     elevation: 0,
                   ),
-                  onPressed: isAddingToCart ? null : () {},
+                  onPressed: null,
                 ),
               ),
               SizedBox(height: kSectionSpacing),

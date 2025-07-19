@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../data/services/api_service.dart';
+import 'package:get/get.dart';
 
 class OrderHistoryView extends StatefulWidget {
   const OrderHistoryView({super.key});
@@ -43,6 +44,7 @@ class _OrderHistoryViewState extends State<OrderHistoryView> {
             ),
           ),
           centerTitle: true,
+          automaticallyImplyLeading: true, // Show back button
         ),
         body: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -97,7 +99,9 @@ class _OrderHistoryViewState extends State<OrderHistoryView> {
                         borderRadius: BorderRadius.circular(16),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(16),
-                          onTap: null, // For future details navigation
+                          onTap: () {
+                            Get.toNamed('/order-detail', arguments: order);
+                          },
                           child: Padding(
                             padding: const EdgeInsets.all(16),
                             child: Row(
