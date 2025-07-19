@@ -322,6 +322,39 @@ class HomepageView extends StatelessWidget {
                                             theme.textTheme.bodyMedium?.color,
                                       ),
                                     ),
+                                    SizedBox(height: kItemSpacing),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        cartController.addToCart(product['id']);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              '${product['name']} added to cart!',
+                                              style: GoogleFonts.inter(),
+                                            ),
+                                            duration: Duration(seconds: 1),
+                                            backgroundColor: theme.primaryColor,
+                                          ),
+                                        );
+                                      },
+                                      icon: Icon(Icons.add_shopping_cart),
+                                      label: Text('Add to Cart',
+                                          style: GoogleFonts.inter(
+                                              fontWeight: FontWeight.bold)),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: theme.primaryColor,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12)),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        textStyle: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),

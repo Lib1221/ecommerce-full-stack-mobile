@@ -1,15 +1,15 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:check/data/services/api_service.dart';
+import 'package:check/presentation/controllers/cart_controller.dart';
+import 'package:check/presentation/controllers/theme_controller.dart';
+import 'package:check/presentation/controllers/wishlist_controller.dart';
+import 'package:check/presentation/pages/animated_button.dart';
+import 'package:check/presentation/pages/cart_icon_with_badge.dart';
+import 'package:check/presentation/pages/modern_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../presentation/controllers/cart_controller.dart';
-import '../../presentation/controllers/wishlist_controller.dart';
-import '../../presentation/controllers/theme_controller.dart';
-import '../../data/services/api_service.dart';
-import './modern_app_bar.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/ui_constants.dart';
-import './cart_icon_with_badge.dart';
-import './animated_button.dart';
 
 class ProductDetailsView extends StatefulWidget {
   final Map<String, dynamic> product;
@@ -27,11 +27,13 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
   Map<String, dynamic>? product;
   List<dynamic> relatedProducts = [];
   bool isLoadingRelated = true;
+  bool isAddingToCart = false;
 
   @override
   void initState() {
     super.initState();
-    product = widget.product;
+    // If using GetX navigation
+    product = Get.arguments as Map<String, dynamic>;
     _fetchRelated();
   }
 
@@ -213,11 +215,44 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
               SizedBox(height: kSectionSpacing),
               // Add to Cart Button
               AnimatedButton(
-                onTap: () {
-                  cartController.addToCart(product!['id']);
+                onTap: () async {
+                  if (isAddingToCart) return;
+                  setState(() {
+                    isAddingToCart = true;
+                  });
+                  try {
+                    await cartController.addToCart(product!['id']);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content:
+                            Text('Added to cart!', style: GoogleFonts.inter()),
+                        backgroundColor: theme.primaryColor,
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to add to cart',
+                            style: GoogleFonts.inter()),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                  } finally {
+                    setState(() {
+                      isAddingToCart = false;
+                    });
+                  }
                 },
                 child: ElevatedButton.icon(
-                  icon: Icon(Icons.add_shopping_cart, size: 22),
+                  icon: isAddingToCart
+                      ? SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white))
+                      : Icon(Icons.add_shopping_cart, size: 22),
                   label: Text('Add to Cart',
                       style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold, fontSize: 18)),
@@ -232,7 +267,7 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                         borderRadius: BorderRadius.circular(kCardRadius)),
                     elevation: 0,
                   ),
-                  onPressed: null,
+                  onPressed: isAddingToCart ? null : () {},
                 ),
               ),
               SizedBox(height: kSectionSpacing),
@@ -366,36 +401,142 @@ class _ProductDetailsViewState extends State<ProductDetailsView> {
                 );
               }),
               SizedBox(height: kSectionSpacing),
-              // Product Reviews Template
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text('Product Reviews',
+                    style: GoogleFonts.inter(
+                        fontSize: 20, fontWeight: FontWeight.bold)),
+              ),
+              SizedBox(height: kSectionSpacing),
+              // Play Store-style review summary
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Product Reviews',
-                        style: GoogleFonts.inter(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    SizedBox(height: kSectionSpacing),
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.cardColor,
-                        borderRadius: BorderRadius.circular(kCardRadius),
-                        border: Border.all(color: theme.dividerColor),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'No reviews yet. Be the first to review this product!',
-                          style: GoogleFonts.inter(
-                              fontSize: 16,
-                              color: theme.textTheme.bodyMedium?.color),
-                          textAlign: TextAlign.center,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('4.6',
+                            style: GoogleFonts.inter(
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.amber[800])),
+                        SizedBox(width: kItemSpacing),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: List.generate(
+                                  5,
+                                  (i) => Icon(Icons.star,
+                                      color: Colors.amber, size: 24)),
+                            ),
+                            SizedBox(height: kItemSpacing),
+                            Text('1,234 reviews',
+                                style: GoogleFonts.inter(
+                                    fontSize: 14, color: Colors.grey[700])),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: kItemSpacing),
+                    // Star distribution bars (static example)
+                    ...List.generate(5, (i) {
+                      final star = 5 - i;
+                      final percent = [0.8, 0.1, 0.05, 0.03, 0.02][i];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2.0),
+                        child: Row(
+                          children: [
+                            Text('$star',
+                                style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.bold)),
+                            Icon(Icons.star, color: Colors.amber, size: 18),
+                            SizedBox(width: kItemSpacing),
+                            Expanded(
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[300],
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                  ),
+                                  FractionallySizedBox(
+                                    widthFactor: percent,
+                                    child: Container(
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber[700],
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: kItemSpacing),
+                            Text('${(percent * 100).toInt()}%',
+                                style: GoogleFonts.inter(
+                                    fontSize: 13, color: Colors.grey[700])),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              SizedBox(height: kItemSpacing),
+              // Example review cards (replace with real data later)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Card(
+                      margin: EdgeInsets.only(bottom: kItemSpacing),
+                      child: ListTile(
+                        leading: CircleAvatar(child: Icon(Icons.person)),
+                        title: Text('Great product!',
+                            style:
+                                GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                        subtitle: Text(
+                            'I really liked this product. It works as expected and the quality is excellent.'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(
+                              5,
+                              (i) => Icon(Icons.star,
+                                  color: Colors.amber, size: 18)),
                         ),
                       ),
                     ),
+                    Card(
+                      margin: EdgeInsets.only(bottom: kItemSpacing),
+                      child: ListTile(
+                        leading: CircleAvatar(child: Icon(Icons.person)),
+                        title: Text('Not bad',
+                            style:
+                                GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                        subtitle:
+                            Text('The product is okay, but shipping was slow.'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(
+                              3,
+                              (i) => Icon(Icons.star,
+                                  color: Colors.amber, size: 18)),
+                        ),
+                      ),
+                    ),
+                    // Add more sample reviews as needed
                     SizedBox(height: kItemSpacing),
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        // TODO: Show add review dialog
+                      },
                       icon: Icon(Icons.rate_review),
                       label: Text('Add a Review',
                           style:
