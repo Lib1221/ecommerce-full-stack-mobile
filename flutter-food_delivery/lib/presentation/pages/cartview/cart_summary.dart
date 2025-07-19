@@ -20,34 +20,7 @@ class CartSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: couponController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter coupon code',
-                  ),
-                ),
-              ),
-              SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: () {
-                  // UI only, no backend logic
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Coupon applied (UI only)')),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primaryColor,
-                  foregroundColor: theme.colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(kCardRadius)),
-                ),
-                child: Text('Apply'),
-              ),
-            ],
-          ),
+          // Coupon input removed
           SizedBox(height: kItemSpacing),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
