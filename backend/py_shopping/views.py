@@ -22,6 +22,12 @@ from rest_framework import status
 from .serializers import (
     UserSerializer, CategorySerializer, ProductSerializer, CartItemSerializer, CartSerializer, OrderItemSerializer, OrderSerializer
 )
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from .models import CartItem, Order, OrderItem
+from .serializers import OrderSerializer
 
 # ===== Permissions =====
 class IsSeller(permissions.BasePermission):
@@ -406,3 +412,33 @@ def homepage_api(request):
     products = Product.objects.all()
     data = ProductSerializer(products, many=True).data
     return Response(data)
+
+class CartCheckoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        cart, _ = Cart.objects.get_or_create(user=user)
+        cart_items = CartItem.objects.filter(cart=cart)
+        if not cart_items.exists():
+            return Response({'error': 'Cart is empty.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the order
+        order = Order.objects.create(user=user, total=0)
+        total = 0
+        for item in cart_items:
+            order_item = OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+            total += item.product.price * item.quantity
+
+        order.total = total
+        order.save()
+
+        # Clear the cart
+        cart_items.delete()
+
+        return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)

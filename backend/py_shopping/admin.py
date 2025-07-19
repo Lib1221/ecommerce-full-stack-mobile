@@ -31,7 +31,7 @@ class OrderItemInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
-    list_display = ('user', 'status', 'total_amount', 'created_at')
+    list_display = ('user', 'status', 'total', 'created_at')
     list_filter = ('status',)
 
 # Custom Admin Dashboard
@@ -50,7 +50,7 @@ class ShopAdminSite(admin.AdminSite):
     def dashboard_view(self, request):
         from django.db.models import Sum
         from django.db.models.functions import TruncMonth
-        total_sales = Order.objects.aggregate(total=Sum('total_amount'))['total'] or 0
+        total_sales = Order.objects.aggregate(total=Sum('total'))['total'] or 0
         order_count = Order.objects.count()
         product_count = Product.objects.count()
         category_count = Category.objects.count()
@@ -60,7 +60,7 @@ class ShopAdminSite(admin.AdminSite):
             Order.objects
             .annotate(month=TruncMonth('created_at'))
             .values('month')
-            .annotate(total=Sum('total_amount'))
+            .annotate(total=Sum('total'))
             .order_by('month')
         )
         chart_labels = [s['month'].strftime('%b %Y') for s in sales_by_month]

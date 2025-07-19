@@ -48,10 +48,16 @@ class CartSerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
     product_price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
+    product_image = serializers.CharField(source='product.image', read_only=True)
+    product_description = serializers.CharField(source='product.description', read_only=True)
+    product_category = serializers.CharField(source='product.category.name', read_only=True)
     
     class Meta:
         model = OrderItem
-        fields = ['id', 'product', 'product_name', 'product_price', 'quantity']
+        fields = [
+            'id', 'product', 'product_name', 'product_price',
+            'product_image', 'product_description', 'product_category', 'quantity'
+        ]
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
