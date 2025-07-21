@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../presentation/controllers/auth_controller.dart';
-import './modern_app_bar.dart';
 import '../../core/ui_constants.dart';
-import './animated_button.dart';
 
 class SignupView extends StatefulWidget {
   const SignupView({super.key});
 
   @override
-  _SignupViewState createState() => _SignupViewState();
+  State<SignupView> createState() => _SignupViewState();
 }
 
 class _SignupViewState extends State<SignupView> {
@@ -23,206 +21,232 @@ class _SignupViewState extends State<SignupView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        appBar: ModernAppBar(
-          title: 'Sign Up',
-          actions: [
-            IconButton(
-              icon: Icon(Icons.person_add_alt_1),
-              onPressed: () {},
-            ),
-          ],
-        ),
-        body: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(kPagePadding),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Logo/avatar
-                CircleAvatar(
-                  radius: 48,
-                  backgroundColor: theme.cardColor,
-                  child: Icon(Icons.person_add,
-                      size: 48, color: theme.iconTheme.color?.withOpacity(0.7)),
+    Theme.of(context);
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background image
+          Image.network(
+            'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=934&q=80',
+            fit: BoxFit.cover,
+          ),
+
+          // Dark overlay
+          Container(color: Colors.black.withOpacity(0.6)),
+
+          // Signup form
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(kCardRadius * 2),
+                  border: Border.all(color: Colors.white.withOpacity(0.3)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 20,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: kSectionSpacing),
-                // Welcome text
-                Text(
-                  'Create Account',
-                  style: GoogleFonts.inter(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: theme.textTheme.titleLarge?.color,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: kItemSpacing),
-                Text(
-                  'Join Shop Mobile today!',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    color: theme.textTheme.titleMedium?.color,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: kSectionSpacing),
-                Form(
+                child: Form(
                   key: _formKey,
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Title
+                      Text(
+                        'Create Account',
+                        style: GoogleFonts.inter(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: kItemSpacing),
+                      Text(
+                        'Join Shop Mobile today!',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      const SizedBox(height: kSectionSpacing),
+
+                      // Username
                       TextFormField(
                         controller: usernameController,
-                        decoration: InputDecoration(
-                          labelText: 'Username',
-                          prefixIcon: Icon(Icons.person),
-                        ),
+                        style: const TextStyle(color: Colors.white),
+                        decoration: _inputDecoration('Username', Icons.person),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Please enter your username'
+                            ? 'Enter username'
                             : null,
                       ),
-                      SizedBox(height: kItemSpacing),
+                      const SizedBox(height: kItemSpacing),
+
+                      // Email
                       TextFormField(
                         controller: emailController,
+                        style: const TextStyle(color: Colors.white),
                         keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.email),
-                        ),
+                        decoration: _inputDecoration('Email', Icons.email),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Please enter your email'
+                            ? 'Enter email'
                             : null,
                       ),
-                      SizedBox(height: kItemSpacing),
+                      const SizedBox(height: kItemSpacing),
+
+                      // Password
                       TextFormField(
                         controller: passwordController,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          prefixIcon: Icon(Icons.lock),
-                        ),
+                        style: const TextStyle(color: Colors.white),
                         obscureText: true,
+                        decoration: _inputDecoration('Password', Icons.lock),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Please enter your password'
+                            ? 'Enter password'
                             : null,
                       ),
-                      SizedBox(height: kItemSpacing),
+                      const SizedBox(height: kItemSpacing),
+
+                      // Confirm Password
                       TextFormField(
                         controller: confirmPasswordController,
-                        decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          prefixIcon: Icon(Icons.lock_outline),
-                        ),
+                        style: const TextStyle(color: Colors.white),
                         obscureText: true,
+                        decoration: _inputDecoration(
+                            'Confirm Password', Icons.lock_outline),
                         validator: (value) => value != passwordController.text
                             ? 'Passwords do not match'
                             : null,
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: kSectionSpacing),
-                // Error message
-                Obx(() {
-                  if (authController.error.value.isNotEmpty) {
-                    return Container(
-                      padding: const EdgeInsets.all(kCardPadding),
-                      margin: const EdgeInsets.only(bottom: kItemSpacing),
-                      decoration: BoxDecoration(
-                        color: theme.cardColor,
-                        borderRadius: BorderRadius.circular(kCardRadius),
-                        border: Border.all(color: theme.dividerColor),
+
+                      const SizedBox(height: kSectionSpacing),
+
+                      // Error message
+                      Obx(() {
+                        if (authController.error.value.isNotEmpty) {
+                          return Container(
+                            padding: const EdgeInsets.all(kCardPadding),
+                            margin: const EdgeInsets.only(bottom: kItemSpacing),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius:
+                                  BorderRadius.circular(kCardRadius),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.error, color: Colors.redAccent),
+                                const SizedBox(width: kItemSpacing),
+                                Expanded(
+                                  child: Text(
+                                    authController.error.value,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }),
+
+                      // Sign up button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: Obx(() => authController.isLoading.value
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              )
+                            : ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Colors.white.withOpacity(0.2),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(kCardRadius),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                onPressed: () {
+                                  if (_formKey.currentState?.validate() ??
+                                      false) {
+                                    authController.signup(
+                                      usernameController.text,
+                                      emailController.text,
+                                      passwordController.text,
+                                    );
+                                  } else {
+                                    Get.snackbar(
+                                      'Error',
+                                      'Please fill in all fields',
+                                      backgroundColor: Colors.redAccent,
+                                      colorText: Colors.white,
+                                    );
+                                  }
+                                },
+                                child: Text(
+                                  'Sign Up',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              )),
                       ),
-                      child: Row(
+                      const SizedBox(height: kItemSpacing),
+
+                      // Already have an account?
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.error, color: theme.iconTheme.color),
-                          const SizedBox(width: kItemSpacing),
-                          Expanded(
+                          Text(
+                            'Already have an account? ',
+                            style: GoogleFonts.inter(color: Colors.white70),
+                          ),
+                          TextButton(
+                            onPressed: () => Get.offAllNamed('/login'),
                             child: Text(
-                              authController.error.value,
+                              'Login',
                               style: GoogleFonts.inter(
-                                  color: theme.textTheme.bodyMedium?.color),
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                }),
-                // Signup button
-                AnimatedButton(
-                  onTap: () {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      authController.signup(
-                        usernameController.text,
-                        emailController.text,
-                        passwordController.text,
-                      );
-                    } else {
-                      Get.snackbar(
-                        'Error',
-                        'Please fill in all fields',
-                        snackPosition: SnackPosition.TOP,
-                        backgroundColor: theme.snackBarTheme.backgroundColor,
-                        colorText: theme.snackBarTheme.contentTextStyle?.color,
-                      );
-                    }
-                  },
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme
-                          .elevatedButtonTheme.style?.backgroundColor
-                          ?.resolve({}),
-                      foregroundColor: theme
-                          .elevatedButtonTheme.style?.foregroundColor
-                          ?.resolve({}),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(kCardRadius),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: null,
-                    child: Text(
-                      'Sign Up',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: theme.elevatedButtonTheme.style?.foregroundColor
-                            ?.resolve({}),
-                      ),
-                    ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: kItemSpacing),
-                // Navigation to login
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Already have an account? ',
-                      style: GoogleFonts.inter(
-                          color: theme.textTheme.titleMedium?.color),
-                    ),
-                    TextButton(
-                      onPressed: () => Get.offAllNamed('/login'),
-                      child: Text(
-                        'Login',
-                        style: GoogleFonts.inter(
-                          color: theme.primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white70),
+      prefixIcon: Icon(icon, color: Colors.white70),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(kCardRadius),
+        borderSide: const BorderSide(color: Colors.white30),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(kCardRadius),
+        borderSide: const BorderSide(color: Colors.white),
       ),
     );
   }

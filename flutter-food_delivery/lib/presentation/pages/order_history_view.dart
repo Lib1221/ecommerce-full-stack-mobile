@@ -44,7 +44,7 @@ class _OrderHistoryViewState extends State<OrderHistoryView> {
             ),
           ),
           centerTitle: true,
-          automaticallyImplyLeading: true, // Show back button
+          automaticallyImplyLeading: true, 
         ),
         body: Padding(
           padding: const EdgeInsets.all(24.0),

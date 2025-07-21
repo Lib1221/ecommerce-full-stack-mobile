@@ -4,21 +4,19 @@ import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.8:8000/';
+   static const String baseUrl = 'http://192.168.1.202:8000/';
   // static const String baseUrl = 'http://10.0.2.2:8000/';
   final box = GetStorage();
 
-  // ✅ FIXED: Changed Bearer to Token for DRF
   Map<String, String> _getHeaders() {
     final token = box.read('token');
     final headers = {'Content-Type': 'application/json'};
     if (token != null) {
-      headers['Authorization'] = 'Token $token'; // <-- This is the fix
+      headers['Authorization'] = 'Token $token';
     }
     return headers;
   }
 
-  // Helper for checkout/order endpoints to always include token
   Map<String, String> _getAuthHeaders() {
     final token = box.read('token');
     final headers = {'Content-Type': 'application/json'};

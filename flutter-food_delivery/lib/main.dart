@@ -15,7 +15,6 @@ void main() async {
   Stripe.publishableKey = stripePublishableKey;
   await GetStorage.init();
 
-  // Initialize controllers
   Get.put(AuthController());
   Get.put(ProductController());
   Get.put(CartController());
@@ -36,7 +35,7 @@ class MyApp extends StatelessWidget {
     final themeController = Get.find<ThemeController>();
 
     return Obx(() => GetMaterialApp(
-          title: 'Shop Mobile',
+          title: 'Shop',
           initialRoute: initialRoute,
           getPages: AppPages.pages,
           theme: ThemeData(
