@@ -1,5 +1,6 @@
+Here is your clean `README.md` file as requested:
 
-```
+````markdown
 # 🛒 Full Stack eCommerce App
 
 > 🚀 Built with Django + Flutter  
@@ -49,13 +50,12 @@ A full-featured mobile-first eCommerce application with a secure backend and a b
 | Payments   | Stripe API + PaymentSheet                    |
 | Media      | Cloudinary (optional for image hosting)      |
 
---
-
 ---
-````
+
 ## 🛠️ Backend Setup (Django)
 
 1. Clone the repo:
+
    ```bash
    git clone https://github.com/lib1221/ecommerce-full-stack-mobile.git
    cd ecommerce-app/backend
@@ -116,7 +116,7 @@ A full-featured mobile-first eCommerce application with a secure backend and a b
    ```bash
    flutter run
    ```
-```
+
 ---
 
 ## 🔐 Authentication Flow
@@ -146,6 +146,8 @@ sequenceDiagram
 
 4. User pays and gets confirmation.
 
+---
+
 ## 🤝 Contributing
 
 ```bash
@@ -155,8 +157,4 @@ git commit -m "feat: add your feature"
 git push origin feature/your-feature
 ```
 
-Then open a **pull request**.
 
-
---
-```
