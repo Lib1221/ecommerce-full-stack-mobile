@@ -1,6 +1,3 @@
-Here is your clean `README.md` file as requested:
-
-````markdown
 # 🛒 Full Stack eCommerce App
 
 > 🚀 Built with Django + Flutter  
@@ -59,7 +56,7 @@ A full-featured mobile-first eCommerce application with a secure backend and a b
    ```bash
    git clone https://github.com/lib1221/ecommerce-full-stack-mobile.git
    cd ecommerce-app/backend
-````
+   ```
 
 2. Create virtual environment:
 
@@ -151,10 +148,8 @@ sequenceDiagram
 ## 🤝 Contributing
 
 ```bash
-git clone https://github.com/your-username/ecommerce-app.git
+git clone https://github.com/Lib1221/ecommerce-full-stack-mobile.git
 git checkout -b feature/your-feature
 git commit -m "feat: add your feature"
 git push origin feature/your-feature
 ```
-
-
